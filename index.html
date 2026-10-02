@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Коллаборации и проекты</title>
+<meta name="description" content="Ищу крутые коллаборации, идеи для контента и поддержку проектов.">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Onest:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#07060d; --ink:#ecebf5; --mute:#9b98b4;
+    --violet:#8b5cf6; --cyan:#22d3ee; --pink:#f472b6;
+    --glass:rgba(255,255,255,.055); --edge:rgba(255,255,255,.13);
+  }
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:'Onest',system-ui,sans-serif;overflow-x:hidden}
+  h1,h2,h3,.display{font-family:'Unbounded','Onest',sans-serif;letter-spacing:-.02em}
+
+  /* фон с мягкими светящимися пятнами */
+  .orb{position:fixed;border-radius:50%;filter:blur(110px);opacity:.38;pointer-events:none;z-index:0;animation:drift 18s ease-in-out infinite alternate}
+  .orb.a{width:520px;height:520px;background:var(--violet);top:-140px;left:-120px}
+  .orb.b{width:460px;height:460px;background:var(--cyan);top:35%;right:-160px;animation-delay:-6s;opacity:.26}
+  .orb.c{width:420px;height:420px;background:var(--pink);bottom:-140px;left:25%;animation-delay:-11s;opacity:.22}
+  @keyframes drift{to{transform:translate(60px,40px) scale(1.12)}}
+  .grain{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
+  main,header,footer{position:relative;z-index:1}
+
+  /* стекло */
+  .glass{background:var(--glass);border:1px solid var(--edge);backdrop-filter:blur(22px) saturate(140%);-webkit-backdrop-filter:blur(22px) saturate(140%);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 24px 60px -24px rgba(0,0,0,.7);border-radius:28px}
+
+  .grad-text{background:linear-gradient(100deg,var(--cyan),var(--violet) 55%,var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  /* кнопки */
+  .btn{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;padding:.95rem 1.5rem;border-radius:999px;font-weight:600;
+    border:1px solid var(--edge);background:var(--glass);color:var(--ink);cursor:pointer;transition:transform .25s,box-shadow .25s,border-color .25s;will-change:transform}
+  .btn:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.35);box-shadow:0 10px 34px -8px var(--violet)}
+  .btn:active{transform:translateY(0) scale(.98)}
+  .btn.primary{background:linear-gradient(110deg,var(--violet),#6366f1 50%,var(--cyan));border-color:transparent;color:#fff;box-shadow:0 8px 30px -8px var(--violet)}
+  .btn.primary:hover{box-shadow:0 12px 44px -6px var(--cyan)}
+  .btn.warm{background:linear-gradient(110deg,var(--pink),#fb7185);border-color:transparent;color:#1a0b14}
+  .btn.warm:hover{box-shadow:0 12px 40px -8px var(--pink)}
+
+  /* поля форм */
+  .field{width:100%;padding:.9rem 1.1rem;border-radius:16px;background:rgba(255,255,255,.045);border:1px solid var(--edge);color:var(--ink);font:inherit;transition:border-color .2s,box-shadow .2s,background .2s}
+  .field::placeholder{color:#6f6c88}
+  .field:focus{outline:none;border-color:var(--cyan);background:rgba(255,255,255,.07);box-shadow:0 0 0 4px rgba(34,211,238,.15)}
+  select.field option{background:#14122a;color:var(--ink)}
+  label.lbl{display:block;font-size:.85rem;color:var(--mute);margin:0 0 .4rem .2rem}
+  :focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+
+  /* появление при скролле */
+  .reveal{opacity:0;transform:translateY(28px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1);transition-delay:var(--d,0s)}
+  .reveal.in{opacity:1;transform:none}
+
+  /* заголовок hero: построчное появление при загрузке */
+  .hero-line{display:block;overflow:hidden}
+  .hero-line>span{display:block;transform:translateY(105%);animation:rise 1s cubic-bezier(.2,.8,.2,1) forwards}
+  .hero-line:nth-child(2)>span{animation-delay:.12s}
+  .hero-line:nth-child(3)>span{animation-delay:.24s}
+  @keyframes rise{to{transform:none}}
+
+  .status{min-height:1.4rem;font-size:.92rem}
+  .toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,30px);opacity:0;padding:.8rem 1.3rem;border-radius:999px;z-index:50;transition:.35s}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  .card-num{font-family:'Unbounded',sans-serif;letter-spacing:.08em}
+
+  /* ===== адаптив: текст всегда помещается в экран ===== */
+  html{overflow-x:clip;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  body{overflow-wrap:break-word;word-break:normal;min-width:320px}
+  h1,h2,h3,p,a,label{overflow-wrap:break-word;hyphens:auto}
+  h1.h-hero{font-size:clamp(1.2rem,5.8vw,4rem)!important;line-height:1.12!important}
+  .hero-line{padding-bottom:.12em;margin-bottom:-.12em}
+  main h2{font-size:clamp(1.3rem,5.6vw,2.4rem)!important;line-height:1.15}
+  main h3{font-size:clamp(1.05rem,4.5vw,1.3rem)!important}
+  main p.text-lg{font-size:clamp(.95rem,3.8vw,1.125rem)!important}
+  .card-num{font-size:clamp(.85rem,4.2vw,1.5rem);letter-spacing:.04em;white-space:nowrap}
+  .glass.p-8{padding:1.5rem}
+  .field{min-width:0;max-width:100%;font-size:16px} /* 16px: iOS не зумит поля */
+  .btn{max-width:100%;text-align:center;white-space:normal;line-height:1.25}
+  nav .display{font-size:clamp(.75rem,3.4vw,.9rem)}
+  @media (min-width:640px){.glass.p-8{padding:2rem}}
+  @media (max-width:480px){
+    .hero-cta .btn{width:100%}
+    .btn{padding:.9rem 1.1rem}
+    nav.glass{padding:.6rem .8rem!important}
+    section{padding-top:2.75rem!important;padding-bottom:2.75rem!important}
+    #top>section:first-child{padding-top:3rem!important}
+    .glass{border-radius:22px}
+  }
+  @media (min-width:1536px){main>section{max-width:64rem}}
+
+  /* ===== лёгкая версия для слабых телефонов: без фоновых анимаций ===== */
+  html{-webkit-tap-highlight-color:transparent}
+  body{padding-bottom:5.5rem;background:radial-gradient(60vmax 60vmax at 0% 0%,rgba(139,92,246,.26),transparent 60%),radial-gradient(50vmax 50vmax at 100% 45%,rgba(34,211,238,.15),transparent 60%),radial-gradient(50vmax 50vmax at 30% 100%,rgba(244,114,182,.13),transparent 60%),var(--bg)}
+  .orb,.grain{display:none}
+  .reveal{opacity:1!important;transform:none!important;transition:none!important}
+  .hero-line>span{transform:none!important;animation:none!important}
+  .glass{background:rgba(24,21,44,.78);backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.1)}
+  @media (min-width:900px) and (hover:hover){.glass{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}}
+
+  /* кнопки без линий по краям */
+  .btn{transition:none;transform:none!important;-webkit-appearance:none;appearance:none}
+  .btn,.btn:hover,.btn:active{box-shadow:none!important}
+  .btn.primary,.btn.warm{border:0;background-origin:border-box}
+  .btn:focus:not(:focus-visible){outline:none}
+  @media (hover:hover){.btn:hover{filter:brightness(1.12)}}
+
+  /* быстрые кнопки внизу экрана */
+  .dock{position:fixed;left:50%;bottom:calc(10px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:40;display:flex;gap:6px;width:calc(100% - 16px);max-width:560px;padding:6px;border-radius:999px;background:rgba(14,12,28,.94)}
+  .dock .btn{flex:1 1 0;min-width:0;padding:.7rem .4rem;font-size:clamp(.7rem,3.1vw,.9rem);border-radius:999px}
+  .dock .btn:not(.primary):not(.warm){background:rgba(255,255,255,.09);border:0}
+  .toast{bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+  body{padding-bottom:6.5rem}
+  section{scroll-margin-top:12px}
+  .dock{gap:6px;padding:6px;border-radius:26px;max-width:520px}
+  .dock .btn{flex-direction:column;gap:3px;min-height:56px;padding:.5rem .25rem;border-radius:20px;font-size:clamp(.72rem,3.2vw,.85rem);font-weight:600;touch-action:manipulation}
+  .dock .btn svg{width:22px;height:22px;flex:none}
+  .dock .btn:active{filter:brightness(1.3)}
+
+  /* жидкое стекло как в iOS: без общего фона, у каждой кнопки своё стекло */
+  .dock{background:none;padding:0;gap:10px;border-radius:0;pointer-events:none}
+  .dock .btn,.dock .btn:not(.primary):not(.warm){pointer-events:auto;position:relative;border:0;color:#fff;border-radius:24px;
+    background:linear-gradient(160deg,rgba(255,255,255,.26),rgba(255,255,255,.07) 48%,rgba(255,255,255,.13));
+    -webkit-backdrop-filter:blur(12px) saturate(180%);backdrop-filter:blur(12px) saturate(180%);
+    box-shadow:inset 0 1px 1px rgba(255,255,255,.7),inset 0 -1px 1px rgba(255,255,255,.2),inset 0 0 14px rgba(255,255,255,.08),0 8px 20px -8px rgba(0,0,0,.55)!important;
+    text-shadow:0 1px 2px rgba(0,0,0,.35)}
+  .dock .btn.primary{background:linear-gradient(160deg,rgba(255,255,255,.3),rgba(139,92,246,.38) 50%,rgba(34,211,238,.3))}
+  .dock .btn.warm{background:linear-gradient(160deg,rgba(255,255,255,.3),rgba(244,114,182,.4) 55%,rgba(251,113,133,.3))}
+  .dock .btn::before{content:"";position:absolute;left:12%;right:12%;top:2px;height:36%;border-radius:20px;background:linear-gradient(rgba(255,255,255,.32),transparent);pointer-events:none}
+  @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+    .dock .btn,.dock .btn:not(.primary):not(.warm){background-color:rgba(40,36,72,.92)}
+  }
+
+  /* заставка при входе: только transform/opacity, 2.3 с, потом исчезает */
+  #intro{position:fixed;inset:0;z-index:100;display:grid;place-items:center;background:#07060d;pointer-events:none;will-change:transform;animation:curtain 2.3s cubic-bezier(.77,0,.18,1) forwards}
+  #intro::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,var(--cyan),var(--violet),var(--pink))}
+  #intro .logo{text-align:center;animation:pop .9s cubic-bezier(.2,.8,.2,1) both}
+  #intro .logo b{display:block;font-family:'Unbounded',sans-serif;font-size:clamp(1.4rem,8vw,2.6rem);letter-spacing:-.02em}
+  #intro .logo i{display:block;height:2px;margin:14px auto 0;width:min(220px,60vw);background:linear-gradient(90deg,var(--cyan),var(--violet),var(--pink));transform-origin:left;animation:draw .8s .35s cubic-bezier(.6,0,.2,1) both}
+  @keyframes pop{from{opacity:0;transform:scale(.92)}}
+  @keyframes draw{from{transform:scaleX(0)}}
+  @keyframes curtain{0%,62%{transform:translate3d(0,0,0);visibility:visible}99%{transform:translate3d(0,-101%,0);visibility:visible}100%{transform:translate3d(0,-101%,0);visibility:hidden}}
+  @media (prefers-reduced-motion:reduce){#intro{display:none!important}}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+    .reveal,.hero-line>span{opacity:1;transform:none}
+  }
+</style>
+</head>
+<body>
+<div id="intro" aria-hidden="true"><div class="logo"><b class="grad-text">COLLAB.LAB</b><i></i></div></div>
+
+<!-- Навигация -->
+<header class="px-5 pt-5">
+  <nav class="glass mx-auto max-w-5xl flex items-center justify-between px-5 py-3" style="border-radius:999px">
+    <a href="#top" class="display text-sm font-bold grad-text">COLLAB.LAB</a>
+    <div class="hidden sm:flex gap-6 text-sm text-[color:var(--mute)]">
+      <a href="#collab" class="hover:text-white transition">Коллаб</a>
+      <a href="#idea" class="hover:text-white transition">Идеи</a>
+      <a href="#support" class="hover:text-white transition">Донат</a>
+    </div>
+    <a href="#collab" class="btn primary !py-2 !px-4 text-sm">Написать</a>
+  </nav>
+</header>
+
+<main id="top">
+  <!-- HERO -->
+  <section class="mx-auto max-w-5xl px-5 pt-20 pb-24 sm:pt-28 text-center">
+    <p class="inline-block glass px-4 py-1.5 text-sm text-[color:var(--mute)] mb-8" style="border-radius:999px">
+      <span class="inline-block w-2 h-2 rounded-full bg-[color:var(--cyan)] mr-2 align-middle" style="box-shadow:0 0 12px var(--cyan)"></span>Открыт к новым проектам
+    </p>
+    <h1 class="h-hero font-extrabold">
+      <span class="hero-line"><span>Ищу крутые</span></span>
+      <span class="hero-line"><span class="grad-text">коллаборации</span></span>
+      <span class="hero-line"><span>и безумные проекты</span></span>
+    </h1>
+    <p class="mt-8 mx-auto max-w-xl text-lg text-[color:var(--mute)] reveal">
+      Стримы, длинные видео, Shorts, Reels и TikTok. Делаем контент вместе, придумываем форматы и растим аудиторию друг друга.
+    </p>
+  </section>
+
+  <!-- ФОРМА КОЛЛАБОРАЦИИ -->
+  <section id="collab" class="mx-auto max-w-5xl px-5 py-16 grid md:grid-cols-5 gap-8 items-start">
+    <div class="md:col-span-2 reveal">
+      <h2 class="text-3xl sm:text-4xl font-bold">Давай сделаем что-то вместе</h2>
+      <p class="mt-4 text-[color:var(--mute)]">Расскажи, кто ты и что хочешь предложить. Читаю все заявки и отвечаю на почту или в соцсетях.</p>
+    </div>
+    <form id="collabForm" class="glass md:col-span-3 p-6 sm:p-8 grid gap-5 reveal" style="--d:.1s" novalidate>
+      <input type="hidden" name="_subject" value="Новая заявка на коллаборацию">
+      <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" style="display:none" aria-hidden="true">
+      <div class="grid sm:grid-cols-2 gap-5">
+        <div><label class="lbl" for="c-name">Имя</label><input class="field" id="c-name" name="name" required placeholder="Как к тебе обращаться"></div>
+        <div><label class="lbl" for="c-nick">Ник в соцсетях</label><input class="field" id="c-nick" name="nickname" required placeholder="@username и ссылка"></div>
+      </div>
+      <div>
+        <label class="lbl" for="c-role">Вид деятельности</label>
+        <select class="field" id="c-role" name="activity" required>
+          <option value="" disabled selected>Выбери из списка</option>
+          <option>Стример</option><option>Видеоблогер</option><option>Шортс / Reels / TikTok</option>
+          <option>Музыкант</option><option>Художник / дизайнер</option><option>Бренд / компания</option><option>Другое</option>
+        </select>
+      </div>
+      <div><label class="lbl" for="c-msg">Для чего хотите связаться или сделать коллаб</label>
+        <textarea class="field" id="c-msg" name="message" rows="4" required placeholder="Идея, формат, даты, что ждёшь от коллаба"></textarea></div>
+      <button class="btn primary w-full" type="submit">Отправить заявку</button>
+      <p class="status" role="status" aria-live="polite"></p>
+    </form>
+  </section>
+
+  <!-- ИДЕИ -->
+  <section id="idea" class="mx-auto max-w-5xl px-5 py-16 grid md:grid-cols-5 gap-8 items-start">
+    <form id="ideaForm" class="glass md:col-span-3 p-6 sm:p-8 grid gap-5 reveal order-2 md:order-1" novalidate>
+      <input type="hidden" name="_subject" value="Новая идея для контента">
+      <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" style="display:none" aria-hidden="true">
+      <div class="grid sm:grid-cols-2 gap-5">
+        <div><label class="lbl" for="i-name">Имя или ник</label><input class="field" id="i-name" name="name" required placeholder="Подпишу твоё авторство"></div>
+        <div>
+          <label class="lbl" for="i-type">Формат</label>
+          <select class="field" id="i-type" name="format" required>
+            <option value="" disabled selected>Куда идея</option>
+            <option>Стрим</option><option>Длинное видео</option><option>Shorts</option><option>Reels</option><option>TikTok</option>
+          </select>
+        </div>
+      </div>
+      <div><label class="lbl" for="i-title">Название идеи</label><input class="field" id="i-title" name="idea_title" required placeholder="Коротко, в одну строку"></div>
+      <div><label class="lbl" for="i-text">Опиши идею</label><textarea class="field" id="i-text" name="idea" rows="5" required placeholder="Что происходит, чем зацепит зрителя, что нужно для съёмки"></textarea></div>
+      <div><label class="lbl" for="i-contact">Как связаться (необязательно)</label><input class="field" id="i-contact" name="contact" placeholder="Почта или ник"></div>
+      <button class="btn warm w-full" type="submit">Отправить идею</button>
+      <p class="status" role="status" aria-live="polite"></p>
+    </form>
+    <div class="md:col-span-2 reveal order-1 md:order-2" style="--d:.1s">
+      <h2 class="text-3xl sm:text-4xl font-bold">Есть идея для контента?</h2>
+      <p class="mt-4 text-[color:var(--mute)]">Лучшие идеи попадут в эфиры и ролики. Если возьму идею в работу, обязательно упомяну тебя.</p>
+    </div>
+  </section>
+
+  <!-- ДОНАТ -->
+  <section id="support" class="mx-auto max-w-5xl px-5 py-16 pb-28">
+    <div class="text-center max-w-xl mx-auto reveal">
+      <h2 class="text-3xl sm:text-4xl font-bold">Поддержать автора</h2>
+      <p class="mt-4 text-[color:var(--mute)]">Донаты идут на оборудование, монтаж и новые проекты. Выбери удобный способ.</p>
+    </div>
+    <div class="mt-10 grid md:grid-cols-2 gap-6">
+      <div class="glass p-8 flex flex-col justify-between gap-8 reveal">
+        <div>
+          <h3 class="text-xl font-bold">DonationAlerts</h3>
+          <p class="mt-2 text-[color:var(--mute)]">Донат со сбором на экран во время стрима, с сообщением.</p>
+        </div>
+        <a id="daLink" class="btn warm" href="https://www.donationalerts.com/r/BoostArm" target="_blank" rel="noopener">Перейти на DonationAlerts</a>
+      </div>
+      <div class="glass p-8 flex flex-col justify-between gap-8 reveal" style="--d:.1s">
+        <div>
+          <h3 class="text-xl font-bold">Перевод на карту</h3>
+          <p id="cardNum" class="card-num mt-4 grad-text">4093 9800 1527 2738</p>
+          <p id="cardHolder" class="mt-2 text-sm text-[color:var(--mute)]">Банк, получатель: ВТБ - Сергей Сетало</p>
+        </div>
+        <button id="copyBtn" class="btn primary" type="button">Скопировать номер карты</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="px-5 pb-10 text-center text-sm text-[color:var(--mute)]">© <span id="year"></span> COLLAB.LAB. Все права защищены.</footer>
+<nav class="dock" aria-label="Быстрые действия">
+  <a href="#collab" class="btn primary" aria-label="Предложить коллаб"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5M16 4.7a3.5 3.5 0 0 1 0 6.6M18.5 14.9c1.8.8 2.8 2.4 3 5.1"/></svg>Коллаб</a>
+  <a href="#support" class="btn warm" aria-label="Поддержать автора"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.2 4.2 0 0 1 12 7.6 4.2 4.2 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/></svg>Поддержать</a>
+  <a href="#idea" class="btn" aria-label="Идея для контента"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>Идея</a>
+</nav>
+<div id="toast" class="toast glass" role="status" aria-live="polite"></div>
+
+<script>
+/* ===== НАСТРОЙКИ: замени значения ниже ===== */
+const https://formspree.io/f/xoevordr = "https://formspree.io/f/YOUR_FORM_ID"; // ID формы из formspree.io (почта andrejsetaloo@gmail.com указывается там)
+/* Номер карты и ссылка DonationAlerts меняются прямо в HTML выше (блок «Поддержать автора») */
+
+/* ===== Сайт всегда открывается сверху ===== */
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+window.scrollTo(0, 0);
+
+/* ===== Убираем заставку из страницы после анимации ===== */
+const intro = document.getElementById('intro');
+if (intro) {
+  const rm = () => intro.remove();
+  intro.addEventListener('animationend', e => { if (e.target === intro) rm(); });
+  setTimeout(rm, 3500);
+}
+
+/* ===== Тост ===== */
+const toastEl = document.getElementById('toast');
+let toastTimer;
+function toast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200);
+}
+
+/* ===== Отправка форм через Formspree ===== */
+function bindForm(id, okText) {
+  const form = document.getElementById(id);
+  const status = form.querySelector('.status');
+  const btn = form.querySelector('button[type=submit]');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!form.checkValidity()) {
+      status.style.color = '#fda4af';
+      status.textContent = 'Заполни все обязательные поля.';
+      form.reportValidity();
+      return;
+    }
+    if (FORMSPREE_URL.includes('YOUR_FORM_ID')) {
+      status.style.color = '#fda4af';
+      status.textContent = 'Форма не подключена: вставь свой ID Formspree в код.';
+      return;
+    }
+    const label = btn.textContent;
+    btn.disabled = true; btn.textContent = 'Отправляю…'; status.textContent = '';
+    try {
+      const res = await fetch(FORMSPREE_URL, {
+        method: 'POST', body: new FormData(form), headers: { 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        form.reset();
+        status.style.color = '#6ee7b7';
+        status.textContent = okText;
+        toast('Отправлено');
+      } else {
+        throw new Error('bad status');
+      }
+    } catch (err) {
+      status.style.color = '#fda4af';
+      status.textContent = 'Не удалось отправить. Проверь интернет и попробуй ещё раз.';
+    } finally {
+      btn.disabled = false; btn.textContent = label;
+    }
+  });
+}
+bindForm('collabForm', 'Заявка отправлена. Отвечу, как только прочитаю.');
+bindForm('ideaForm', 'Идея отправлена. Спасибо!');
+
+/* ===== Копирование номера карты ===== */
+document.getElementById('copyBtn').addEventListener('click', async () => {
+  const num = document.getElementById('cardNum').textContent.replace(/\s/g, '');
+  try {
+    await navigator.clipboard.writeText(num);
+  } catch (e) {
+    const t = document.createElement('textarea');
+    t.value = num; document.body.appendChild(t); t.select();
+    document.execCommand('copy'); t.remove();
+  }
+  toast('Номер карты скопирован');
+});
+
+document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
+
